@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_create">Create</string>
+    <string name="action_insert_picture">Insert Picture</string>
+    <string name="action_choose_color">Choose Color</string>
+    <string name="action_new_note">New Note</string>
+    <string name="title">Title</string>
+    <string name="action_accept">Accept</string>
+</resources>

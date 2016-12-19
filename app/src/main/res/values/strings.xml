@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Note</string>
+    <string name="action_insert_picture">Insert Picture</string>
+    <string name="action_choose_color">Choose Color</string>
+    <string name="action_new_note">New Note</string>
+    <string name="title">Title</string>
+    <string name="action_accept">Accept</string>
+</resources>
