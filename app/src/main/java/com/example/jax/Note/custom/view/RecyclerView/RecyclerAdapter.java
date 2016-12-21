@@ -62,14 +62,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
         //Bind
         holder.mTitle.setText(title);
         holder.mNote.setText(note);
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                  //xoa
-                   // listener.onItemClick(noteInfo.get(position).id);
-                  //edit
-                  listener.editNote(dbHelper.getSingleNote(noteInfo.get(position).id));
-            }
+        holder.cardView.setOnClickListener(view -> {
+              //xoa
+               // listener.onItemClick(noteInfo.get(position).id);
+              //edit
+              listener.editNote(dbHelper.getSingleNote(noteInfo.get(position).id));
         });
     }
 

@@ -8,8 +8,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.internal.BottomNavigationItemView;
+import android.support.design.internal.BottomNavigationMenuView;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +44,7 @@ import com.example.jax.assignment_note.R;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +65,8 @@ public class NewNoteActivity extends Activity {
     NoteInfo mNoteInfoToUpdate ;
     RelativeLayout rl;
     ColorNote color = new ColorNote();
+    BottomNavigationView bottomNavigation;
+    private static final String TAG = MainActivity.class.getSimpleName();
 
 
 
@@ -65,7 +75,6 @@ public class NewNoteActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_note);
-
         dbHelper = DBHelper.getInstance(getApplicationContext());
 
         ActionBar actionBar = getActionBar();
@@ -83,17 +92,64 @@ public class NewNoteActivity extends Activity {
         grGirdViewAdapter = new GirdViewAdapter(this,R.layout.grid_item_layout, dataImage);
         gridView.setAdapter(grGirdViewAdapter);
 
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation_bottom);
+        disableShiftMode(bottomNavigation);
+        bottomNavigation.setOnNavigationItemSelectedListener(this::onNavigationItemSelect);
 
         Bundle data = getIntent().getExtras();
         if (data != null && data.containsKey(Consts.NOTE)) {
             mNoteInfoToUpdate = (NoteInfo) data.getSerializable(Consts.NOTE);
         }
+       /* if(data==null){
+            bottomNavigation.getMenu().clear();
+            bottomNavigation.inflateMenu(R.menu.bottom_navigation);
+        }*/
         try {
             initValuesForUi();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+
+
+    }
+
+    private boolean onNavigationItemSelect(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_previous:
+                Toast.makeText(NewNoteActivity.this,"Previous",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_share:
+                Toast.makeText(NewNoteActivity.this,"Share",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_delete:
+                Toast.makeText(NewNoteActivity.this,"Delete",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_next:
+                Toast.makeText(NewNoteActivity.this,"Next",Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return true;
+    }
+
+    public void disableShiftMode(BottomNavigationView view) {
+        BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
+        try {
+            Field shiftingMode = menuView.getClass().getDeclaredField("mShiftingMode");
+            shiftingMode.setAccessible(true);
+            shiftingMode.setBoolean(menuView, false);
+            shiftingMode.setAccessible(false);
+            for (int i = 0; i < menuView.getChildCount(); i++) {
+                BottomNavigationItemView item = (BottomNavigationItemView) menuView.getChildAt(i);
+                item.setShiftingMode(false);
+                // set once again checked value, so view will be updated
+                item.setChecked(item.getItemData().isChecked());
+            }
+        } catch (NoSuchFieldException e) {
+            Log.e(TAG, "Unable to get shift mode field");
+        } catch (IllegalAccessException e) {
+            Log.e(TAG, "Unable to change value of shift mode");
         }
     }
 
@@ -102,15 +158,16 @@ public class NewNoteActivity extends Activity {
         if (mNoteInfoToUpdate == null) return;
         editTitle.setText(mNoteInfoToUpdate.title);
         editNote.setText(mNoteInfoToUpdate.note);
+        setTitle(mNoteInfoToUpdate.title);
         //color
         if(mNoteInfoToUpdate.color != null) {
             rl.setBackgroundColor(Color.parseColor(mNoteInfoToUpdate.color));
         }
         //photo
-        ArrayList<Bitmap> showImage = new ArrayList<>();
+        /*ArrayList<Bitmap> showImage = new ArrayList<>();
             showImage.add(dbBitmapUtility.getImage(dbHelper.getSingleNote(mNoteInfoToUpdate.id).image));
             grGirdViewAdapter = new GirdViewAdapter(this, R.layout.grid_item_layout, showImage);
-            gridView.setAdapter(grGirdViewAdapter);
+            gridView.setAdapter(grGirdViewAdapter);*/
 
     }
 
@@ -134,17 +191,14 @@ public class NewNoteActivity extends Activity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(NewNoteActivity.this);
                 builder.setTitle("Insert Picture");
                 final CharSequence[] items ={"Take Photo","Choose Photo"};
-                builder.setItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        switch (i){
-                            case 0:
-                                cameraIntent();
-                                break;
-                            case 1:
-                                galleryIntent();
-                                break;
-                        }
+                builder.setItems(items, (dialogInterface, i) -> {
+                    switch (i){
+                        case 0:
+                            cameraIntent();
+                            break;
+                        case 1:
+                            galleryIntent();
+                            break;
                     }
                 });
                 builder.create().show();
@@ -159,6 +213,8 @@ public class NewNoteActivity extends Activity {
             return super.onOptionsItemSelected(item);
         }
 
+
+
     }
 
     private void onNoteResult() {
@@ -166,6 +222,7 @@ public class NewNoteActivity extends Activity {
         NoteInfo noteInfo = new NoteInfo();
         if(!editTitle.getText().toString().isEmpty()){
             noteInfo.title = editTitle.getText().toString();
+            setTitle(editTitle.getText().toString());
         }
         if(!editNote.getText().toString().isEmpty()){
             noteInfo.note = editNote.getText().toString();
@@ -199,42 +256,30 @@ public class NewNoteActivity extends Activity {
         dialog.setContentView(R.layout.dialog_color_item);
 
         Button btnWhite = (Button)dialog.findViewById(R.id.btn_white);
-        btnWhite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                rl.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                color.setColor("#FFFFFF");
-                dialog.dismiss();
-            }
+        btnWhite.setOnClickListener(view -> {
+            rl.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            color.setColor("#FFFFFF");
+            dialog.dismiss();
         });
 
         Button btnYellow = (Button)dialog.findViewById(R.id.btn_yellow);
-        btnYellow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                    rl.setBackgroundColor(Color.parseColor("#EEFF41"));
-                    color.setColor("#EEFF41");
-                    dialog.dismiss();
-            }
+        btnYellow.setOnClickListener(view -> {
+                rl.setBackgroundColor(Color.parseColor("#EEFF41"));
+                color.setColor("#EEFF41");
+                dialog.dismiss();
         });
         Button btnBlue = (Button)dialog.findViewById(R.id.btn_blue);
-        btnBlue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                rl.setBackgroundColor(Color.parseColor("#18FFFF"));
-                color.setColor("#18FFFF");
-                dialog.dismiss();
-            }
+        btnBlue.setOnClickListener(view -> {
+            rl.setBackgroundColor(Color.parseColor("#18FFFF"));
+            color.setColor("#18FFFF");
+            dialog.dismiss();
         });
 
         Button btnBlue1 = (Button)dialog.findViewById(R.id.btn_blue1);
-        btnBlue1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                rl.setBackgroundColor(Color.parseColor("#81D4FA"));
-                color.setColor("#81D4FA");
-                dialog.dismiss();
-            }
+        btnBlue1.setOnClickListener(view -> {
+            rl.setBackgroundColor(Color.parseColor("#81D4FA"));
+            color.setColor("#81D4FA");
+            dialog.dismiss();
         });
         dialog.show();
     }
@@ -264,12 +309,12 @@ public class NewNoteActivity extends Activity {
             } else if (requestCode == Consts.SELECT_FILE) {
                 onSelectFileResult(data);
             }
-            Bundle data1 = getIntent().getExtras();
-            if(data1!= null) {
-                Bitmap imageUpdate = dbBitmapUtility.getImage(dbHelper.getSingleNote(mNoteInfoToUpdate.id).image);
-                Bitmap imageUpdate1 = Bitmap.createScaledBitmap(imageUpdate, 150, 150, true);
-                grGirdViewAdapter.addItem(imageUpdate1);
-            }
+        }
+        //save image
+        Uri selectedImageUri = data.getData();
+        if(selectedImageUri != null){
+          //  if(saveImageInDB(selectedImageUri))
+
         }
     }
 
@@ -302,32 +347,19 @@ public class NewNoteActivity extends Activity {
     }
 
     private void deleteImage(){
-        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int pos, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(NewNoteActivity.this);
-                builder.setTitle("Confirm Delete");
-                builder.setMessage("Are you sure want to delete this ?");
-                builder.setPositiveButton("Yes",new DialogInterface.OnClickListener(){
+        gridView.setOnItemLongClickListener((adapterView, view, pos, id) -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(NewNoteActivity.this);
+            builder.setTitle("Confirm Delete");
+            builder.setMessage("Are you sure want to delete this ?");
+            builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+                grGirdViewAdapter.removeItem(pos);
+                grGirdViewAdapter.notifyDataSetChanged();
 
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        grGirdViewAdapter.removeItem(pos);
-                        grGirdViewAdapter.notifyDataSetChanged();
+            });
 
-                    }
-                });
-
-                builder.setNegativeButton("No",new DialogInterface.OnClickListener(){
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-                builder.create().show();
-                return true;
-            }
+            builder.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.cancel());
+            builder.create().show();
+            return true;
         });
 
     }

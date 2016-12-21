@@ -24,7 +24,6 @@
         </activity>
         <activity
             android:name="com.example.jax.Note.activity.NewNoteActivity"
-            android:label="@string/title"
             android:parentActivityName="com.example.jax.Note.activity.MainActivity">
         </activity>
     </application>
