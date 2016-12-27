@@ -35,10 +35,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "db_note";
     private static final int DB_VERSION = 1;
-/*
-    public DBHelper(Context context, String title, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, title, factory, version);
-    }*/
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -49,7 +45,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 + COLUMN_NOTE + " TEXT,"
                 + COLUMN_COLOR + " TEXT,"
                 + COLUMN_CREATE_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
-                + COLUMN_IMAGE+ " BLOB"
+                + COLUMN_IMAGE+ " TEXT"
                 +")";
         db.execSQL(CREATE_TABLE);
     }
@@ -80,13 +76,13 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase database = getWritableDatabase();
         database.beginTransaction();
         try {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_TITLE, noteInfo.title);
-            contentValues.put(COLUMN_NOTE, noteInfo.note);
-            contentValues.put(COLUMN_COLOR, noteInfo.color);
-            contentValues.put(COLUMN_CREATE_AT, getDateTime());
-            contentValues.put(COLUMN_IMAGE, noteInfo.image);
-            database.insert(TB_NAME, null, contentValues);
+            ContentValues cv = new ContentValues();
+            cv.put(COLUMN_TITLE, noteInfo.title);
+            cv.put(COLUMN_NOTE, noteInfo.note);
+            cv.put(COLUMN_COLOR, noteInfo.color);
+            cv.put(COLUMN_CREATE_AT, getDateTime());
+            cv.put(COLUMN_IMAGE, noteInfo.path);
+            database.insert(TB_NAME, null, cv);
             database.setTransactionSuccessful();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -105,13 +101,13 @@ public class DBHelper extends SQLiteOpenHelper {
     public int updateNote(NoteInfo noteInfo, int id) {
         SQLiteDatabase database = getWritableDatabase();
 
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_TITLE, noteInfo.title);
-            contentValues.put(COLUMN_NOTE, noteInfo.note);
-            contentValues.put(COLUMN_COLOR, noteInfo.color);
-            contentValues.put(COLUMN_CREATE_AT, noteInfo.currentDateTime);
-            contentValues.put(COLUMN_IMAGE, noteInfo.image);
-           int i = database.update(TB_NAME, contentValues, COLUMN_ID + " = " + id, null );
+            ContentValues cv = new ContentValues();
+            cv.put(COLUMN_TITLE, noteInfo.title);
+            cv.put(COLUMN_NOTE, noteInfo.note);
+            cv.put(COLUMN_COLOR, noteInfo.color);
+            cv.put(COLUMN_CREATE_AT, getDateTime());
+            cv.put(COLUMN_IMAGE, noteInfo.path);
+           int i = database.update(TB_NAME, cv, COLUMN_ID + " = " + id, null );
            return  i;
     }
 
@@ -142,7 +138,7 @@ public class DBHelper extends SQLiteOpenHelper {
             noteInfo.note = cursor.getString(2);
             noteInfo.color = cursor.getString(3);
             noteInfo.currentDateTime = cursor.getString(4);
-            noteInfo.image = cursor.getBlob(5);
+            noteInfo.path = cursor.getString(5);
         }
         return noteInfo;
     }
@@ -159,13 +155,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 do {
 
                     NoteInfo noteInfo = new NoteInfo();
+                    noteInfo.id = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
                     noteInfo.title = cursor.getString(cursor.getColumnIndex(COLUMN_TITLE));
                     noteInfo.note = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE));
                     noteInfo.color = cursor.getString(cursor.getColumnIndex(COLUMN_COLOR));
                     noteInfo.currentDateTime = cursor.getString(cursor.getColumnIndex(COLUMN_CREATE_AT));
-                    noteInfo.image = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGE));
-                    noteInfo.id = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
-
+                    noteInfo.path = cursor.getString(cursor.getColumnIndex(COLUMN_IMAGE));
                     noteList.add(noteInfo);
 
                 } while (cursor.moveToNext());
@@ -178,6 +173,36 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
         return noteList;
+    }
+
+    public NoteInfo previousNote(){
+        NoteInfo noteInfo = new NoteInfo();
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM " + TB_NAME,null);
+        if(cursor!=null && !cursor.isBeforeFirst()) {
+            cursor.moveToPrevious();
+            noteInfo.title = cursor.getString(1);
+            noteInfo.note = cursor.getString(2);
+            noteInfo.color = cursor.getString(3);
+            noteInfo.currentDateTime = cursor.getString(4);
+            noteInfo.path = cursor.getString(5);
+        }
+        return noteInfo;
+    }
+
+    public NoteInfo nextNote(){
+        NoteInfo noteInfo = new NoteInfo();
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM " + TB_NAME,null);
+        if(cursor!=null && !cursor.isAfterLast()) {
+            cursor.moveToNext();
+            noteInfo.title = cursor.getString(1);
+            noteInfo.note = cursor.getString(2);
+            noteInfo.color = cursor.getString(3);
+            noteInfo.currentDateTime = cursor.getString(4);
+            noteInfo.path = cursor.getString(5);
+        }
+        return noteInfo;
     }
 
 }

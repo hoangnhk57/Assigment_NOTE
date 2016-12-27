@@ -1,4 +1,4 @@
-package com.example.jax.Note;
+package com.example.jax.Note.config;
 
 
 public class Consts {

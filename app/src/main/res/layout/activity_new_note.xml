@@ -14,7 +14,7 @@
         <GridView
             android:id="@+id/grid_image"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:numColumns="3" />
 
         <TextView
@@ -87,16 +87,16 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <android.support.design.widget.BottomNavigationView
+    <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
         android:id="@+id/navigation_bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="@android:color/holo_blue_light"
         android:elevation="6dp"
         android:layout_alignParentBottom ="true"
         app:itemIconTint="@color/cardview_light_background"
         app:itemTextColor="@color/cardview_light_background"
         app:menu="@menu/bottom_navigation">
-        </android.support.design.widget.BottomNavigationView>
+        </com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx>
 
 </RelativeLayout>
