@@ -48,7 +48,6 @@ public class NewNoteActivity extends Activity {
     private GridView gridView;
     private GirdViewAdapter grGirdViewAdapter;
     private List<String> dataPath = new ArrayList<>();
-    private PathImageUtility pathImageUtility = new PathImageUtility();
 
     //add Item
     private EditText editTitle, editNote;
@@ -90,7 +89,7 @@ public class NewNoteActivity extends Activity {
         if (data != null && data.containsKey(Consts.NOTE)) {
             mNoteInfoToUpdate = (NoteInfo) data.getSerializable(Consts.NOTE);
         }
-        if(data == null){
+        if (data == null) {
             bottomNavigation.setVisibility(View.GONE);
         }
         initValuesForUi();
@@ -99,30 +98,29 @@ public class NewNoteActivity extends Activity {
 
     private boolean onNavigationItemSelect(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_previous:
-                editTitle.setText(dbHelper.previousNote().title);
-                editNote.setText(dbHelper.previousNote().note);
-                tvTime.setText(dbHelper.previousNote().currentDateTime);
-               // rl.setBackgroundColor(Color.parseColor(dbHelper.previousNote().color));
-                rl.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                Toast.makeText(NewNoteActivity.this, "Previous", Toast.LENGTH_SHORT).show();
+             case R.id.action_previous:
                 break;
-            case R.id.action_share:
-                Toast.makeText(NewNoteActivity.this, "Share", Toast.LENGTH_SHORT).show();
+             case R.id.action_share:
+                 String title = mNoteInfoToUpdate.title;
+                 String note = mNoteInfoToUpdate.note;
+                 Intent intentShare = new Intent("android.intent.action.SEND");
+                 intentShare.setType("text/plain");
+                 intentShare.putExtra(Intent.EXTRA_TEXT,title +"\n"+ note);
+                 startActivity(Intent.createChooser(intentShare,"Share with"));
                 break;
-            case R.id.action_delete:
-                dbHelper.deleteNote(mNoteInfoToUpdate.id);
-                Intent i = new Intent(NewNoteActivity.this, MainActivity.class);
-                startActivity(i);
-                Toast.makeText(NewNoteActivity.this, "Delete", Toast.LENGTH_SHORT).show();
+             case R.id.action_delete:
+                 AlertDialog.Builder builder = new AlertDialog.Builder(NewNoteActivity.this);
+                 builder.setTitle("Confirm Delete");
+                 builder.setMessage("Are you sure want to delete this ?");
+                 builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+                     dbHelper.deleteNote(mNoteInfoToUpdate.id);
+                     Intent end = new Intent(NewNoteActivity.this, MainActivity.class);
+                     startActivity(end);
+                 });
+                 builder.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.cancel());
+                 builder.create().show();
                 break;
-            case R.id.action_next:
-                editTitle.setText(dbHelper.nextNote().title);
-                editNote.setText(dbHelper.nextNote().note);
-                tvTime.setText(dbHelper.nextNote().currentDateTime);
-              //  rl.setBackgroundColor(Color.parseColor(dbHelper.nextNote().color));
-                rl.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                Toast.makeText(NewNoteActivity.this, "Next", Toast.LENGTH_SHORT).show();
+             case R.id.action_next:
                 break;
         }
         return true;
@@ -143,9 +141,9 @@ public class NewNoteActivity extends Activity {
 
         //photo
         if (mNoteInfoToUpdate.path != null) {
-                List<String> arrayPath = pathImageUtility.convertStringToList(mNoteInfoToUpdate.path);
-                grGirdViewAdapter = new GirdViewAdapter(NewNoteActivity.this, R.layout.grid_item_layout, arrayPath);
-                gridView.setAdapter(grGirdViewAdapter);
+            List<String> arrayPath = PathImageUtility.convertStringToList(mNoteInfoToUpdate.path);
+            grGirdViewAdapter = new GirdViewAdapter(NewNoteActivity.this, R.layout.grid_item_layout, arrayPath);
+            gridView.setAdapter(grGirdViewAdapter);
         }
     }
 
@@ -203,7 +201,7 @@ public class NewNoteActivity extends Activity {
             noteInfo.note = editNote.getText().toString();
         }
         //photo
-        noteInfo.path = pathImageUtility.convertListToString(imagePath.getImagePath());
+        noteInfo.path = PathImageUtility.convertListToString(imagePath.getImagePath());
         //color
         noteInfo.color = colorNote.getColor();
         //insert,update
@@ -299,6 +297,7 @@ public class NewNoteActivity extends Activity {
             imagePath = getPath(data.getData());
             Log.d(">>>>>>>>>>>>>>>>>>>>>>>", imagePath);
         }
+
         dataPath.add(imagePath);
         gridView = (GridView) findViewById(R.id.grid_image);
         grGirdViewAdapter = new GirdViewAdapter(this, R.layout.grid_item_layout, dataPath);
@@ -327,18 +326,15 @@ public class NewNoteActivity extends Activity {
             builder.setTitle("Confirm Delete");
             builder.setMessage("Are you sure want to delete this ?");
             builder.setPositiveButton("Yes", (dialogInterface, i) -> {
-                for(int k =0;k<dataPath.size();k++) {
-                    if(k == pos) {
+                for (int k = 0; k < dataPath.size(); k++) {
+                     if (k == pos) {
                         dataPath.remove(k);
-                    }
-                    break;
+                     }
                 }
                 gridView = (GridView) findViewById(R.id.grid_image);
                 grGirdViewAdapter = new GirdViewAdapter(this, R.layout.grid_item_layout, dataPath);
                 gridView.setAdapter(grGirdViewAdapter);
-                /*grGirdViewAdapter.removeItem(pos);
-                grGirdViewAdapter.notifyDataSetChanged();*/
-            });
+             });
 
             builder.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.cancel());
             builder.create().show();

@@ -17,15 +17,14 @@ import java.util.ArrayList;
  */
 public class ViewHolder extends RecyclerView.ViewHolder {
 
-    public TextView mTitle, mNote,mTime;
+    public TextView mTitle, mNote, mTime;
     public CardView cardView;
     public ViewHolder(final View itemView) {
 
         super(itemView);
-        this.mTitle =(TextView)itemView.findViewById(R.id.title_textview1);
-        this.mNote =(TextView)itemView.findViewById(R.id.note_textview1);
-        this.mTime = (TextView)itemView.findViewById(R.id.time_textview1);
-        this.cardView = (CardView)itemView.findViewById(R.id.cardView);
-
+        this.mTitle = (TextView) itemView.findViewById(R.id.title_textview1);
+        this.mNote = (TextView) itemView.findViewById(R.id.note_textview1);
+        this.mTime = (TextView) itemView.findViewById(R.id.time_textview1);
+        this.cardView = (CardView) itemView.findViewById(R.id.cardView);
     }
 }

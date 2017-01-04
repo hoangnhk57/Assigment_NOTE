@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -45,46 +46,13 @@
             android:hint="Note"
             android:maxLines="1"/>
 
-        <LinearLayout
+        <!--<fragment
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/note_textview"
-            android:orientation="horizontal">
+            android:name="com.example.jax.Note.Alarm.AlarmFragment"
+            tools:layout="@layout/activity_alarm" />-->
 
-            <ImageView
-                android:id="@+id/alarms_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_action_alarms" />
-
-            <TextView
-                android:id="@+id/time_button"
-                android:layout_width="60dp"
-                android:layout_height="35dp"
-                android:hint="Alarm"
-                android:textSize="15sp" />
-
-            <Spinner
-                android:id="@+id/date_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"/>
-
-            <Spinner
-                android:id="@+id/time_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"/>
-
-            <Button
-                android:id="@+id/cancel_button"
-                style="?android:borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:text="X"
-                android:visibility="invisible"/>
-
-        </LinearLayout>
     </RelativeLayout>
 
     <com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx
